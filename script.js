@@ -1,67 +1,48 @@
-const list = [
-    { "id": 1, "name": "If Your'e Reading This It's Too Late", "artist_name": "DRAKE", "cover_photo_url": "https://s3.amazonaws.com/hakuapps/prod/album-1.png" },
-    { "id": 2, "name": "Hotter Than July", "artist_name": "Stevie Wonder", "cover_photo_url": "https://s3.amazonaws.com/hakuapps/prod/album-2.png" },
-    { "id": 3, "name": "Overexposed", "artist_name": "Maroon 5", "cover_photo_url": "https://s3.amazonaws.com/hakuapps/prod/album-3.png" },
-    { "id": 4, "name": "Hit n Run Phase One", "artist_name": "PRINCE", "cover_photo_url": "https://s3.amazonaws.com/hakuapps/prod/album-4.png" },
-    { "id": 5, "name": "Brothers", "artist_name": "The Black Keys", "cover_photo_url": "https://s3.amazonaws.com/hakuapps/prod/album-5.png" }
-];
-
-const songlist = [
-    { "id": 1, "album_id": 1, "song_name": "Legend", "song_order": 5, "song_label": ["explicit", "upbeat"], "song_duration": "4:01" },
-    { "id": 2, "album_id": 1, "song_name": "Energy", "song_order": 1, "song_label": null, "song_duration": "3:01" },
-    { "id": 3, "album_id": 1, "song_name": "10 Bands", "song_order": 4, "song_label": ["explicit", "upbeat"], "song_duration": "2:57" },
-    { "id": 4, "album_id": 1, "song_name": "Know Yourself", "song_order": 2, "song_label": null, "song_duration": "4:35" },
-    { "id": 5, "album_id": 1, "song_name": "No Tellin'", "song_order": 3, "song_label": ["explicit", "upbeat"], "song_duration": "5:10" }
-];
-
+// store albums along with their respective songs
 var albumsAndSongs = [];
 
 const carousel = document.querySelector('#carouselControls');
 const tracklist = document.querySelector('#tracklist');
 
+// display current album's tracklist
 carousel.addEventListener('slid.bs.carousel', (event) => {
     createTrackList(event.to);
     tracklist.classList.toggle('show');
-
 });
 
+// collapse current tracklist when changing album
 carousel.addEventListener('slide.bs.carousel', (event) => {
     tracklist.classList.toggle('show');
 });
 
+// initialize albumsAndSongs after fetching album and song data
 window.addEventListener('load', () => {
-    var albums = list;
-    for (var i = 0; i < albums.length; ++i) {
-        console.log(albums[i]);
-        const carouselItem = createCarouselItem(albums[i], i == 0);
-        console.log(carouselItem)
-        carousel.querySelector('.carousel-inner').appendChild(carouselItem);
-    }
-
     fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/albums.json')
-        .then(function (response) {
-            return response.json();
-        }).then(function (albums) {
+        .then(response => { return response.json(); })
+        .then(albums => {
             for (var i = 0; i < albums.length; ++i) {
                 const album = albums[i];
-                albumsAndSongs.push({ album: album });
+                albumsAndSongs.push({ album: album, songs: [] });
                 fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/songs.json?album_id=' + album.id)
-                    .then(function (response) {
-                        return response.json();
+                    .then(response => { return response.json(); })
+                    .then(songs => {
+                        const albumPos = songs[0].album_id - 1;
+                        albumsAndSongs[albumPos].songs = songs;
+                        if (albumPos == 0) {
+                            createTrackList(0);
+                        }
                     })
-                    .then(function (songs) {
-                        albumsAndSongs[i].songs = songs;
-                    })
+                    .catch(error => { console.log(error); })
             }
-        }).catch(function (error) {
-            console.log(error);
-        });
 
-    console.log(albumsAndSongs)
-    createCarousel();
-    createTrackList(0);
+            createCarousel();
+        })
+        .catch(error => { console.log(error); })
 })
 
+/**
+ * creates the carousel of albums
+ */
 function createCarousel() {
     for (var i = 0; i < albumsAndSongs.length; ++i) {
         const carouselItem = createCarouselItem(albumsAndSongs[i].album, i == 0);
@@ -69,13 +50,13 @@ function createCarousel() {
     }
 }
 
+/**
+ * creates the albums carousel item
+ * @param {object} album 
+ * @param {boolean} active 
+ * @returns {node}
+ */
 function createCarouselItem(album, active) {
-    /**
-     * artist_name: "DRAKE"
-        cover_photo_url: "https://s3.amazonaws.com/hakuapps/prod/album-1.png"
-        id: 1
-        name: "If Your'e Reading This It's Too Late"
-     */
     const carouselItem = document.createElement('div');
     carouselItem.classList.add('carousel-item');
     carouselItem.classList.add('card');
@@ -107,6 +88,10 @@ function createCarouselItem(album, active) {
     return carouselItem;
 }
 
+/**
+ * creates the tracklist for the current album
+ * @param {Number} albumPos 
+ */
 function createTrackList(albumPos) {
     const orderedList = document.createElement('ul');
     orderedList.classList.add('list-group');
@@ -124,6 +109,11 @@ function createTrackList(albumPos) {
     }
 }
 
+/**
+ * creates the track information
+ * @param {object} track 
+ * @returns {node}
+ */
 function createTrack(track) {
     const listItem = document.createElement('li');
     listItem.classList.add('list-group-item');
@@ -151,7 +141,6 @@ function createTrack(track) {
 
     if (track.song_label != null) {
         for (const label of track.song_label) {
-            console.log(label);
             const span = document.createElement('span');
             span.classList.add('p-2');
             span.appendChild(document.createTextNode(label));
