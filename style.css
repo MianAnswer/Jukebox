@@ -17,10 +17,13 @@
     color: #d9d900;
 }
 
-.bi-star-fill:hover, .list-group-item:hover .bi-star-fill {
+.list-group-item:hover .bi-star-fill {
     color: white;
 }
 
+.bi-star-fill:hover {
+    cursor: pointer;
+}
 .list-group-item span {
     font-size: small;
     margin-right: 10px;
