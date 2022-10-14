@@ -1,0 +1,39 @@
+* {
+    font-family: 'Roboto', sans-serif;
+    text-transform: uppercase;
+}
+
+.carousel-item.active, .list-group-item:hover {
+    background-color: #0085B2;
+    color: white;
+}
+
+.bi-star-fill {
+    color: #DDDDDD;
+    font-size: larger;
+}
+
+.bi-star-fill.checked {
+    color: #d9d900;
+}
+
+.bi-star-fill:hover, .list-group-item:hover .bi-star-fill {
+    color: white;
+}
+
+.list-group-item span {
+    font-size: small;
+    margin-right: 10px;
+    background-color: #DDDDDD;
+    color: #000;
+}
+
+.list-group-item:hover span {
+    background-color: #90B9C9;
+    color: white;
+}
+
+.track-number {
+    color: white;
+    background-color: #90B9C9;
+}
