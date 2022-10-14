@@ -38,14 +38,14 @@ window.addEventListener('load', () => {
         carousel.querySelector('.carousel-inner').appendChild(carouselItem);
     }
 
-    fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/albums.json')
+    fetch('https://stg-resque.hakuapp.com/albums.json')
         .then(function (response) {
             return response.json();
         }).then(function (albums) {
             for (var i = 0; i < albums.length; ++i) {
                 const album = albums[i];
                 albumsAndSongs.push({ album: album });
-                fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/songs.json?album_id=' + album.id)
+                fetch('https://stg-resque.hakuapp.com/songs.json?album_id=' + album.id)
                     .then(function (response) {
                         return response.json();
                     })
