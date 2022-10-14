@@ -17,28 +17,40 @@ carousel.addEventListener('slide.bs.carousel', (event) => {
 
 // initialize albumsAndSongs after fetching album and song data
 window.addEventListener('load', () => {
-    fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/albums.json')
-        .then(response => { return response.json(); })
-        .then(albums => {
-            for (var i = 0; i < albums.length; ++i) {
-                const album = albums[i];
-                albumsAndSongs.push({ album: album, songs: [] });
-                fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/songs.json?album_id=' + album.id)
-                    .then(response => { return response.json(); })
-                    .then(songs => {
-                        const albumPos = songs[0].album_id - 1;
-                        albumsAndSongs[albumPos].songs = songs;
-                        if (albumPos == 0) {
-                            createTrackList(0);
-                        }
-                    })
-                    .catch(error => { console.log(error); })
+    fetchAlbums()
+        .then(async albums => {
+            for (const album of albums) {
+                const songs = await fetchSongs(album.id);
+                albumsAndSongs.push({ album: album, songs: songs });
             }
 
+            // initialize carousel and tracklist
             createCarousel();
+            createTrackList(0);
         })
-        .catch(error => { console.log(error); })
+        .catch(error => { console.log(error) })
 })
+
+/**
+ * get albums
+ * @returns {object}
+ */
+async function fetchAlbums() {
+    const response = await fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/albums.json');
+    const albums = await response.json();
+    return albums;
+}
+
+/**
+ * get songs for specific album
+ * @param {Number} albumId 
+ * @returns 
+ */
+async function fetchSongs(albumId) {
+    const response = await fetch('https://cors-anywhere.herokuapp.com/https://stg-resque.hakuapp.com/songs.json?album_id=' + albumId);
+    const songs = await response.json();
+    return songs;
+}
 
 /**
  * creates the carousel of albums
